@@ -6,7 +6,13 @@ set -euo pipefail
 TS=$(date +%s)
 
 # Без service worker: для демки он только мешает обновлениям.
+# (web/flutter_service_worker.js — kill-switch для тех, кто успел закэшировать старый SW.)
 MSYS_NO_PATHCONV=1 flutter build web --release --base-href /put-demo/ --pwa-strategy=none
+
+# Иногда flutter build не докладывает статику из web/ — ловим сразу.
+for f in manifest.json favicon.png icons/Icon-192.png flutter_service_worker.js; do
+  [ -f "build/web/$f" ] || { echo "FAIL: build/web/$f отсутствует, пересобери"; exit 1; }
+done
 
 # Вшиваем метку сборки в ссылки на JS (обход кэша GitHub Pages и Telegram).
 sed -i "s|flutter_bootstrap.js\"|flutter_bootstrap.js?v=$TS\"|" build/web/index.html
