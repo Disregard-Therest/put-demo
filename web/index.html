@@ -70,7 +70,9 @@
 
   <script>
     window.addEventListener('flutter-first-frame', function () {
+      // При hot restart событие приходит повторно, когда сплэша уже нет.
       var s = document.getElementById('splash');
+      if (!s) return;
       s.classList.add('hidden');
       setTimeout(function () { s.remove(); }, 600);
     });

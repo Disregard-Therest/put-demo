@@ -34,13 +34,40 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
   }
 
+  void _back() {
+    if (_page > 0) {
+      _controller.previousPage(
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeOutCubic,
+      );
+    } else {
+      AppState.instance.frameScreen = FrameScreen.welcome;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final slides = MockApp.onboardingSlides;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+      padding: const EdgeInsets.fromLTRB(24, 4, 24, 24),
       child: Column(
         children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: GestureDetector(
+              key: const Key('onboarding-back'),
+              onTap: _back,
+              behavior: HitTestBehavior.opaque,
+              child: const MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(4, 8, 20, 10),
+                  child: Text('←',
+                      style: TextStyle(fontSize: 20, height: 1, color: AppColors.muted)),
+                ),
+              ),
+            ),
+          ),
           Expanded(
             child: PageView.builder(
               controller: _controller,
@@ -67,7 +94,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          GoldButton(MockApp.onboardingCta, onTap: _next),
+          // На слайде запроса кнопка неактивна, пока не выбрана хотя бы одна тема.
+          ListenableBuilder(
+            listenable: AppState.instance,
+            builder: (context, _) {
+              final needsTopic = slides[_page].isTopicPicker &&
+                  AppState.instance.selectedTopics.isEmpty;
+              return GoldButton(MockApp.onboardingCta, onTap: needsTopic ? null : _next);
+            },
+          ),
         ],
       ),
     );
@@ -102,6 +137,15 @@ class _Slide extends StatelessWidget {
             style: AppText.display.copyWith(fontSize: 22)),
         const SizedBox(height: 12),
         Text(slide.text, textAlign: TextAlign.center, style: AppText.muted.copyWith(fontSize: 13.5)),
+        if (slide.badges.isNotEmpty) ...[
+          const SizedBox(height: 18),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.center,
+            children: [for (final b in slide.badges) Pill(b)],
+          ),
+        ],
         if (slide.isTopicPicker) ...[
           const SizedBox(height: 20),
           ListenableBuilder(

@@ -69,6 +69,8 @@ class Eyebrow extends StatelessWidget {
 class GoldButton extends StatelessWidget {
   const GoldButton(this.label, {super.key, this.onTap, this.dense = false});
   final String label;
+
+  /// null — кнопка неактивна (приглушена и не реагирует).
   final VoidCallback? onTap;
   final bool dense;
 
@@ -77,21 +79,25 @@ class GoldButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: Container(
-          width: double.infinity,
-          padding: EdgeInsets.symmetric(vertical: dense ? 10 : 13),
-          decoration: BoxDecoration(
-            gradient: AppGradients.goldCta,
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Color(0xFF241A10),
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
+        cursor: onTap == null ? SystemMouseCursors.basic : SystemMouseCursors.click,
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 180),
+          opacity: onTap == null ? 0.35 : 1,
+          child: Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(vertical: dense ? 10 : 13),
+            decoration: BoxDecoration(
+              gradient: AppGradients.goldCta,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Color(0xFF241A10),
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
             ),
           ),
         ),

@@ -42,20 +42,25 @@ class AuthScreen extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 13),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2AABEE),
+                  color: const Color(0xFF1D4460),
+                  border: Border.all(color: const Color(0xFF2E6C97)),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('➤', style: TextStyle(fontSize: 15, color: Colors.white)),
+                    Text('➤', style: TextStyle(fontSize: 15, color: Color(0xFF8FC6EC))),
                     SizedBox(width: 8),
-                    Text(
-                      MockApp.authCta,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
+                    Flexible(
+                      child: Text(
+                        MockApp.authCta,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Color(0xFFD9E9F5),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
                       ),
                     ),
                   ],
@@ -65,9 +70,12 @@ class AuthScreen extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           GhostButton(
-            MockApp.authSecondary,
+            MockApp.authPhoneCta,
             onTap: () => state.frameScreen = FrameScreen.paywall,
           ),
+          const SizedBox(height: 12),
+          Text(MockApp.authNote,
+              textAlign: TextAlign.center, style: AppText.muted.copyWith(fontSize: 11.5)),
         ],
       ),
     );

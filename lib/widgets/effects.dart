@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../data/mock_content.dart';
 import '../theme/app_theme.dart';
-import 'compass_star.dart';
 
 /// Текст, печатающийся посимвольно — «ассистент отвечает».
 class TypingText extends StatefulWidget {
@@ -64,110 +64,6 @@ class _TypingTextState extends State<TypingText> {
   }
 }
 
-/// Карта дня: рубашка → тап → флип с переворотом → значение.
-class TarotFlipCard extends StatefulWidget {
-  const TarotFlipCard({super.key, required this.name, required this.meaning});
-  final String name;
-  final String meaning;
-
-  @override
-  State<TarotFlipCard> createState() => _TarotFlipCardState();
-}
-
-class _TarotFlipCardState extends State<TarotFlipCard> with SingleTickerProviderStateMixin {
-  late final _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 550),
-  );
-
-  void _flip() {
-    _controller.isDismissed
-        ? _controller.forward()
-        : _controller.reverse();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: _flip,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: AnimatedBuilder(
-          animation: _controller,
-          builder: (context, _) {
-            final t = Curves.easeInOutCubic.transform(_controller.value);
-            final angle = t * 3.14159;
-            final showFace = angle > 3.14159 / 2;
-            return Transform(
-              alignment: Alignment.center,
-              transform: Matrix4.identity()
-                ..setEntry(3, 2, 0.0015)
-                ..rotateY(angle),
-              child: showFace
-                  ? Transform(
-                      alignment: Alignment.center,
-                      transform: Matrix4.identity()..rotateY(3.14159),
-                      child: _face(),
-                    )
-                  : _back(),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _back() => Container(
-        height: 118,
-        decoration: BoxDecoration(
-          gradient: AppGradients.glowCard,
-          border: Border.all(color: const Color(0xFF4B3A86)),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: const Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CompassStar(size: 34, dimmed: true),
-            SizedBox(height: 8),
-            Text('Карта дня', style: TextStyle(fontSize: 12, color: AppColors.muted)),
-            Text('нажмите, чтобы открыть',
-                style: TextStyle(fontSize: 10, color: AppColors.muted)),
-          ],
-        ),
-      );
-
-  Widget _face() => Container(
-        height: 118,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          gradient: AppGradients.themeCard,
-          border: Border.all(color: AppColors.gold),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(widget.name,
-                style: AppText.display.copyWith(fontSize: 15, color: AppColors.goldSoft)),
-            const SizedBox(height: 6),
-            Text(
-              widget.meaning,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 10.5, height: 1.35, color: AppColors.text),
-              maxLines: 4,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
-      );
-}
-
 /// Стрик: огонёк + точки, зажигающиеся по очереди.
 class StreakRow extends StatelessWidget {
   const StreakRow({super.key, required this.days});
@@ -178,7 +74,12 @@ class StreakRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text('🔥 $days дней подряд', style: const TextStyle(fontSize: 13)),
+        Flexible(
+          child: Text('🔥 $days дней подряд',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 13)),
+        ),
         Row(
           children: [
             for (var i = 0; i < 7; i++)
@@ -207,36 +108,85 @@ class StreakRow extends StatelessWidget {
   }
 }
 
-/// График состояния — бары, подрастающие при появлении.
+/// График состояния: стек светлых (золото) и трудных (фиолет) чувств по дням —
+/// видно, как меняется соотношение.
 class MoodChart extends StatelessWidget {
-  const MoodChart({super.key, required this.values});
-  final List<double> values;
+  const MoodChart({super.key, required this.positive, required this.negative});
+  final List<double> positive;
+  final List<double> negative;
+
+  static const _posColor = AppColors.gold;
+  static const _negColor = AppColors.accent;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 70,
-      child: TweenAnimationBuilder<double>(
-        tween: Tween(begin: 0, end: 1),
-        duration: const Duration(milliseconds: 900),
-        curve: Curves.easeOutCubic,
-        builder: (context, v, _) => Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            for (final h in values)
-              Expanded(
-                child: Container(
-                  height: 70 * h * v,
-                  margin: const EdgeInsets.symmetric(horizontal: 2.5),
-                  decoration: const BoxDecoration(
-                    gradient: AppGradients.chartBar,
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(5)),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          height: 70,
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0, end: 1),
+            duration: const Duration(milliseconds: 900),
+            curve: Curves.easeOutCubic,
+            builder: (context, v, _) => Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                for (var i = 0; i < positive.length; i++)
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 2.5),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Container(
+                            height: 70 * negative[i] * v,
+                            decoration: BoxDecoration(
+                              color: _negColor.withValues(alpha: 0.75),
+                              borderRadius:
+                                  const BorderRadius.vertical(top: Radius.circular(4)),
+                            ),
+                          ),
+                          const SizedBox(height: 1.5),
+                          Container(
+                            height: 70 * positive[i] * v,
+                            decoration: const BoxDecoration(
+                              color: _posColor,
+                              borderRadius:
+                                  BorderRadius.vertical(bottom: Radius.circular(4)),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            _legendDot(_posColor, MockApp.journalLegendPos),
+            const SizedBox(width: 14),
+            _legendDot(_negColor.withValues(alpha: 0.75), MockApp.journalLegendNeg),
           ],
         ),
-      ),
+      ],
+    );
+  }
+
+  Widget _legendDot(Color color, String label) {
+    return Row(
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+        ),
+        const SizedBox(width: 5),
+        Text(label, style: AppText.muted.copyWith(fontSize: 10.5)),
+      ],
     );
   }
 }

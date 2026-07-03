@@ -52,7 +52,10 @@ class _JournalScreenState extends State<JournalScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Eyebrow(MockApp.journalChartEyebrow),
-                const MoodChart(values: MockApp.journalChart),
+                const MoodChart(
+                  positive: MockApp.journalChartPos,
+                  negative: MockApp.journalChartNeg,
+                ),
                 const SizedBox(height: 6),
                 Text(MockApp.journalChartCaption, style: AppText.muted),
               ],
@@ -87,14 +90,17 @@ class _JournalScreenState extends State<JournalScreen> {
             ),
           ),
           const SizedBox(height: 10),
-          Row(
-            children: [
-              for (var i = 0; i < MockApp.moods.length; i++) ...[
-                if (i > 0) const SizedBox(width: 8),
-                Expanded(child: _moodTile(i)),
+          for (var row = 0; row < 2; row++) ...[
+            if (row > 0) const SizedBox(height: 8),
+            Row(
+              children: [
+                for (var i = row * 4; i < row * 4 + 4; i++) ...[
+                  if (i > row * 4) const SizedBox(width: 8),
+                  Expanded(child: _moodTile(i)),
+                ],
               ],
-            ],
-          ),
+            ),
+          ],
           const SizedBox(height: 12),
           GoldButton(MockApp.journalSave, onTap: _save),
           const SizedBox(height: 18),
@@ -141,11 +147,18 @@ class _JournalScreenState extends State<JournalScreen> {
             children: [
               Text(mood.emoji, style: const TextStyle(fontSize: 19)),
               const SizedBox(height: 3),
-              Text(mood.label,
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: selected ? AppColors.goldSoft : AppColors.muted,
-                  )),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 3),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(mood.label,
+                      maxLines: 1,
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: selected ? AppColors.goldSoft : AppColors.muted,
+                      )),
+                ),
+              ),
             ],
           ),
         ),

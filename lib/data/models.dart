@@ -83,11 +83,13 @@ class OnboardingSlide {
     required this.glyph,
     required this.title,
     required this.text,
+    this.badges = const [],
     this.isTopicPicker = false,
   });
   final String glyph;
   final String title;
   final String text;
+  final List<String> badges;
   final bool isTopicPicker;
 }
 
@@ -97,27 +99,30 @@ class PracticeStep {
   final String text;
 }
 
-class RouteChapter {
-  const RouteChapter({
-    required this.numeral,
+/// Пункт программы месяца/года: видео, вебинар, задание или личная цель.
+enum TaskKind { video, webinar, task, goal }
+
+class ProgramTask {
+  ProgramTask({
+    required this.kind,
     required this.title,
-    required this.subtitle,
-    required this.state,
-    this.progress = 0,
+    this.meta,
+    this.description = '',
+    this.lockedNote,
+    this.goalHint,
+    this.done = false,
   });
-  final String numeral;
-  final String title;
-  final String subtitle;
-  final ChapterState state;
-  final double progress; // 0..1 для текущей главы
-}
 
-enum ChapterState { done, current, locked }
-
-class ChecklistItem {
-  ChecklistItem({required this.title, this.done = false});
+  final TaskKind kind;
   final String title;
+  final String? meta; // «12 мин», «21 день»
+  final String description;
+  final String? lockedNote; // «Откроется 14 июля» — пункт ещё закрыт
+  final String? goalHint;
   bool done;
+  String goalText = '';
+
+  bool get locked => lockedNote != null;
 }
 
 class PaywallPlan {
@@ -133,13 +138,6 @@ class PaywallPlan {
   final String per;
   final String? badge;
   final bool highlighted;
-}
-
-class WeatherHorizon {
-  const WeatherHorizon({required this.label, required this.eyebrow, required this.text});
-  final String label;
-  final String eyebrow;
-  final String text;
 }
 
 /// Обёртка, чтобы панель могла подсвечивать блоки одинаково.

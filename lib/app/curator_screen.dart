@@ -7,6 +7,7 @@ import '../services/curator_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/compass_star.dart';
 import '../widgets/effects.dart';
+import '../widgets/sheets.dart';
 import '../widgets/ui_kit.dart';
 
 class CuratorScreen extends StatefulWidget {
@@ -20,6 +21,7 @@ class _CuratorScreenState extends State<CuratorScreen> {
   final CuratorService _service = ScriptedCuratorService();
   final _inputController = TextEditingController();
   final _scrollController = ScrollController();
+  PracticeRec? _activePractice;
 
   @override
   void dispose() {
@@ -41,12 +43,7 @@ class _CuratorScreenState extends State<CuratorScreen> {
 
   Future<void> _send(String text, {String? promptId}) async {
     final state = AppState.instance;
-    if (text.trim().isEmpty) return;
-    // Фримиум: второй вопрос за день упирается в подписку.
-    if (state.freeQuestionUsed) {
-      state.showPaywallOverlay();
-      return;
-    }
+    if (text.trim().isEmpty || state.compassTyping) return;
     _inputController.clear();
     state.addMessage(ChatMessage(role: ChatRole.user, text: text.trim()));
     state.setCompassTyping(true);
@@ -55,7 +52,6 @@ class _CuratorScreenState extends State<CuratorScreen> {
     final reply = await _service.ask(text, promptId: promptId);
     if (!mounted) return;
     state.setCompassTyping(false);
-    state.freeQuestionUsed = true;
     state.addMessage(ChatMessage(
       role: ChatRole.compass,
       text: reply.text,
@@ -67,6 +63,32 @@ class _CuratorScreenState extends State<CuratorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        _chat(),
+        if (_activePractice != null)
+          SheetOverlay(
+            onClose: () => setState(() => _activePractice = null),
+            child: PracticeSheetContent(
+              title: _activePractice!.title,
+              duration: _activePractice!.duration,
+              steps: MockApp.practices[_activePractice!.title] ?? MockApp.practiceSteps,
+              onDone: () {
+                setState(() => _activePractice = null);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Практика выполнена ✦'),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              },
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _chat() {
     final state = AppState.instance;
     return ListenableBuilder(
       listenable: state,
@@ -94,7 +116,12 @@ class _CuratorScreenState extends State<CuratorScreen> {
                 controller: _scrollController,
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                 children: [
-                  for (final m in state.messages) _Bubble(message: m, onGrow: _scrollToBottom),
+                  for (final m in state.messages)
+                    _Bubble(
+                      message: m,
+                      onGrow: _scrollToBottom,
+                      onStartPractice: (rec) => setState(() => _activePractice = rec),
+                    ),
                   if (state.compassTyping)
                     const _BubbleShell(
                       isUser: false,
@@ -158,20 +185,7 @@ class _CuratorScreenState extends State<CuratorScreen> {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Text.rich(
-                TextSpan(
-                  text: state.freeQuestionUsed
-                      ? MockApp.compassLimitNote
-                      : MockApp.compassFreeNote,
-                  style: AppText.muted.copyWith(
-                    fontSize: 11,
-                    color: state.freeQuestionUsed ? AppColors.goldSoft : AppColors.muted,
-                  ),
-                ),
-              ),
-            ),
+            const SizedBox(height: 8),
           ],
         );
       },
@@ -213,9 +227,10 @@ class _BubbleShell extends StatelessWidget {
 }
 
 class _Bubble extends StatefulWidget {
-  const _Bubble({required this.message, required this.onGrow});
+  const _Bubble({required this.message, required this.onGrow, required this.onStartPractice});
   final ChatMessage message;
   final VoidCallback onGrow;
+  final ValueChanged<PracticeRec> onStartPractice;
 
   @override
   State<_Bubble> createState() => _BubbleState();
@@ -257,14 +272,7 @@ class _BubbleState extends State<_Bubble> {
                 GoldButton(
                   'Начать практику',
                   dense: true,
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Демо: практика откроется в рабочей версии'),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  },
+                  onTap: () => widget.onStartPractice(m.rec!),
                 ),
               ],
             ),

@@ -51,25 +51,38 @@ class _PaywallScreenState extends State<PaywallScreen> {
               ),
             ),
           ),
-          const CompassStar(size: 56),
-          const SizedBox(height: 12),
-          Text(MockApp.paywallTitle,
-              textAlign: TextAlign.center, style: AppText.display.copyWith(fontSize: 23)),
-          const SizedBox(height: 6),
-          Text(MockApp.paywallSub, textAlign: TextAlign.center, style: AppText.muted),
-          const SizedBox(height: 16),
-          for (final b in MockApp.paywallBenefits)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('✦ ', style: TextStyle(color: AppColors.gold, fontSize: 13)),
-                  Expanded(child: Text(b, style: AppText.body.copyWith(fontSize: 12.5))),
-                ],
-              ),
+          Expanded(
+            child: ListView(
+              children: [
+                const CompassStar(size: 56),
+                const SizedBox(height: 12),
+                Text(MockApp.paywallTitle,
+                    textAlign: TextAlign.center, style: AppText.display.copyWith(fontSize: 23)),
+                const SizedBox(height: 6),
+                Text(MockApp.paywallSub, textAlign: TextAlign.center, style: AppText.muted),
+                const SizedBox(height: 16),
+                for (final b in MockApp.paywallBenefits)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('✦ ', style: TextStyle(color: AppColors.gold, fontSize: 13)),
+                        Expanded(child: Text(b, style: AppText.body.copyWith(fontSize: 12.5))),
+                      ],
+                    ),
+                  ),
+                const SizedBox(height: 10),
+                Text(MockApp.paywallRouteTitle,
+                    style: AppText.display.copyWith(fontSize: 17, color: AppColors.goldSoft)),
+                const SizedBox(height: 4),
+                Text(MockApp.paywallRouteText, style: AppText.muted.copyWith(fontSize: 12)),
+                const SizedBox(height: 10),
+                for (var i = 0; i < MockApp.yearMonths.length; i++) _monthTile(i),
+              ],
             ),
-          const Spacer(),
+          ),
+          const SizedBox(height: 8),
           Row(
             children: [
               for (var i = 0; i < MockApp.paywallPlans.length; i++) ...[
@@ -94,6 +107,77 @@ class _PaywallScreenState extends State<PaywallScreen> {
           const SizedBox(height: 8),
           Text(MockApp.paywallNote,
               textAlign: TextAlign.center, style: AppText.muted.copyWith(fontSize: 11)),
+        ],
+      ),
+    );
+  }
+
+  Widget _monthTile(int index) {
+    final m = MockApp.yearMonths[index];
+    final isCurrent = index == 0;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: isCurrent ? const Color(0xFF2C2154) : AppColors.card,
+        border: Border.all(color: isCurrent ? AppColors.gold : AppColors.line),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 24,
+            height: 24,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isCurrent ? const Color(0x33D9B26A) : AppColors.card2,
+              border: Border.all(color: isCurrent ? AppColors.gold : AppColors.line),
+            ),
+            child: Text('${index + 1}',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: isCurrent ? AppColors.goldSoft : AppColors.muted,
+                )),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(m.month,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: isCurrent ? AppColors.goldSoft : AppColors.text,
+                        )),
+                    if (isCurrent) ...[
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                        decoration: BoxDecoration(
+                          gradient: AppGradients.goldCta,
+                          borderRadius: BorderRadius.circular(7),
+                        ),
+                        child: const Text('сейчас',
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF241A10),
+                            )),
+                      ),
+                    ],
+                  ],
+                ),
+                Text(m.theme,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppText.muted.copyWith(fontSize: 11)),
+              ],
+            ),
+          ),
         ],
       ),
     );

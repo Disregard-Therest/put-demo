@@ -8,24 +8,8 @@ class AppState extends ChangeNotifier {
   AppState._();
   static final instance = AppState._();
 
-  // ── Презентация ─────────────────────────────────────────────────────────
-  int _stepIndex = 0;
-  int get stepIndex => _stepIndex;
-  DemoStep get step => demoSteps[_stepIndex];
-
-  void goToStep(int index) {
-    if (index < 0 || index >= demoSteps.length) return;
-    _stepIndex = index;
-    final s = demoSteps[index];
-    _frameScreen = s.frameScreen;
-    if (s.frameScreen == FrameScreen.main) _mainTab = s.mainTab;
-    notifyListeners();
-  }
-
-  void nextStep() => goToStep(_stepIndex + 1);
-  void prevStep() => goToStep(_stepIndex - 1);
-
-  // ── Фрейм ────────────────────────────────────────────────────────────────
+  // ── Единый стейт: канонично только состояние фрейма. ────────────────────
+  // Номер шага презентации ВЫЧИСЛЯЕТСЯ из него — расходиться нечему.
   FrameScreen _frameScreen = FrameScreen.welcome;
   FrameScreen get frameScreen => _frameScreen;
   set frameScreen(FrameScreen value) {
@@ -39,6 +23,33 @@ class AppState extends ChangeNotifier {
     _mainTab = value;
     notifyListeners();
   }
+
+  /// Текущий шаг презентации — производное от экрана фрейма.
+  int get stepIndex {
+    // Пейволл-оверлей поверх приложения — это тоже «экран пейволла».
+    final screen = _paywallOverlay ? FrameScreen.paywall : _frameScreen;
+    final exact = demoSteps.indexWhere((s) =>
+        s.frameScreen == screen &&
+        (s.frameScreen != FrameScreen.main || s.mainTab == _mainTab));
+    if (exact >= 0) return exact;
+    // Вкладки без собственного шага (Дневник, Профиль) — шаг «Ещё экраны».
+    final fallback = demoSteps.lastIndexWhere((s) => s.frameScreen == screen);
+    return fallback >= 0 ? fallback : 0;
+  }
+
+  DemoStep get step => demoSteps[stepIndex];
+
+  void goToStep(int index) {
+    if (index < 0 || index >= demoSteps.length) return;
+    final s = demoSteps[index];
+    _paywallOverlay = false;
+    _frameScreen = s.frameScreen;
+    if (s.frameScreen == FrameScreen.main) _mainTab = s.mainTab;
+    notifyListeners();
+  }
+
+  void nextStep() => goToStep(stepIndex + 1);
+  void prevStep() => goToStep(stepIndex - 1);
 
   /// Пейволл, открытый изнутри приложения (лимит Компаса, глава под замком) —
   /// поверх main, с кнопкой «назад».
@@ -55,7 +66,7 @@ class AppState extends ChangeNotifier {
   }
 
   // ── Онбординг / темы ─────────────────────────────────────────────────────
-  final selectedTopics = <String>{'Деньги'};
+  final selectedTopics = <String>{};
   void toggleTopic(String topic) {
     selectedTopics.contains(topic) ? selectedTopics.remove(topic) : selectedTopics.add(topic);
     notifyListeners();
@@ -65,7 +76,6 @@ class AppState extends ChangeNotifier {
   final messages = <ChatMessage>[
     const ChatMessage(role: ChatRole.compass, text: MockApp.compassGreeting),
   ];
-  bool freeQuestionUsed = false;
   bool compassTyping = false;
 
   void addMessage(ChatMessage message) {
@@ -85,9 +95,16 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ── Чек-лист темы месяца ─────────────────────────────────────────────────
-  void toggleChecklist(ChecklistItem item) {
-    item.done = !item.done;
+  // ── Программа месяца/года ────────────────────────────────────────────────
+  void completeTask(ProgramTask task) {
+    task.done = true;
+    notifyListeners();
+  }
+
+  /// Сохранение цели НЕ отмечает её выполненной: текст появляется в списке,
+  /// а выполненной цель отмечают отдельно, когда она достигнута.
+  void saveGoal(ProgramTask task, String text) {
+    task.goalText = text.trim();
     notifyListeners();
   }
 }
