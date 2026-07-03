@@ -1,11 +1,11 @@
 {
-    "name": "my_web_app",
-    "short_name": "my_web_app",
+    "name": "Путь · демо-прототип",
+    "short_name": "Путь",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#07060f",
+    "theme_color": "#07060f",
+    "description": "Интерактивный прототип приложения «Путь»: погода жизни, практики и проводник Компас.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
