@@ -1,17 +1,19 @@
-# my_web_app
+# «Путь» — демо-презентация прототипа (AmeliSoul)
 
-A new Flutter project.
+Интерактивная демка: живой мобильный фрейм + панель пояснений по каждому экрану.
 
-## Getting Started
+**Live:** https://disregard-therest.github.io/put-demo/
 
-This project is a starting point for a Flutter application.
+- Диплинк на шаг: `?step=3` — открыть сразу шаг 3; `?v=N` — сброс кэша Telegram при повторной отправке ссылки.
+- Контент (все тексты приложения и панелей): `lib/data/mock_content.dart`.
+- Скриптованные ответы Компаса: там же, `compassReplies`; абстракция под реальный API — `lib/services/curator_service.dart`.
 
-A few resources to get you started if this is your first Flutter project:
+## Редеплой
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+```bash
+flutter build web --release --base-href /put-demo/   # в Git Bash: MSYS_NO_PATHCONV=1 перед командой
+cp -r build/web/* docs/
+git add -A && git commit -m "deploy" && git push
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Pages раздаёт `docs/` с ветки `master`, обновляется за 1–2 минуты.
