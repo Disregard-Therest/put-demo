@@ -27,48 +27,53 @@ class PresentationShell extends StatelessWidget {
     );
   }
 
-  // ── Широкий экран: телефон слева, панель справа ──────────────────────────
+  // ── Широкий экран: телефон слева, панель справа, всё по центру ──────────
   Widget _wide(BuildContext context) {
-    return Column(
-      children: [
-        _header(),
-        _stepChips(),
-        Expanded(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(32, 8, 16, 24),
-                  child: FittedBox(
-                    fit: BoxFit.contain,
-                    child: SizedBox.fromSize(size: phoneSize, child: const PhoneFrame()),
-                  ),
-                ),
-              ),
-              Container(
-                width: 520,
-                padding: const EdgeInsets.fromLTRB(8, 8, 32, 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: ExplainPanel(
-                          step: AppState.instance.step,
-                          stepIndex: AppState.instance.stepIndex,
-                        ),
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1180),
+        child: Column(
+          children: [
+            _header(),
+            _stepChips(),
+            Expanded(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(32, 8, 40, 24),
+                      child: FittedBox(
+                        fit: BoxFit.contain,
+                        child: SizedBox.fromSize(size: phoneSize, child: const PhoneFrame()),
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    _navButtons(),
-                  ],
-                ),
+                  ),
+                  Container(
+                    width: 500,
+                    padding: const EdgeInsets.fromLTRB(0, 8, 32, 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          child: SingleChildScrollView(
+                            child: ExplainPanel(
+                              step: AppState.instance.step,
+                              stepIndex: AppState.instance.stepIndex,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        _navButtons(),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
@@ -144,6 +149,7 @@ class PresentationShell extends StatelessWidget {
       child: Wrap(
         spacing: 8,
         runSpacing: 8,
+        alignment: WrapAlignment.center,
         children: [
           for (var i = 0; i < demoSteps.length; i++)
             GestureDetector(

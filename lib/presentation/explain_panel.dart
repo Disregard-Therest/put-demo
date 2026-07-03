@@ -21,12 +21,12 @@ class ExplainPanel extends StatelessWidget {
           'ШАГ ${stepIndex + 1} ИЗ ${demoSteps.length}',
           style: AppText.eyebrow.copyWith(fontSize: 11),
         ),
-        const SizedBox(height: 8),
-        Text(step.title, style: AppText.display.copyWith(fontSize: 26)),
-        const SizedBox(height: 18),
+        const SizedBox(height: 6),
+        Text(step.title, style: AppText.display.copyWith(fontSize: 22)),
+        const SizedBox(height: 14),
         _block(
           label: 'Что это',
-          child: Text(step.whatIs, style: AppText.body.copyWith(fontSize: 15, height: 1.5)),
+          child: Text(step.whatIs, style: AppText.body.copyWith(fontSize: 14, height: 1.45)),
         ),
         _block(
           label: 'Как работает',
@@ -38,8 +38,8 @@ class ExplainPanel extends StatelessWidget {
         ),
         Container(
           width: double.infinity,
-          margin: const EdgeInsets.only(top: 6),
-          padding: const EdgeInsets.all(16),
+          margin: const EdgeInsets.only(top: 2),
+          padding: const EdgeInsets.fromLTRB(14, 12, 14, 6),
           decoration: BoxDecoration(
             gradient: AppGradients.glowCard,
             border: Border.all(color: AppColors.gold.withValues(alpha: 0.55)),
@@ -48,8 +48,8 @@ class ExplainPanel extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('РЕШИТЬ С ЮЛИЕЙ', style: AppText.eyebrow.copyWith(color: AppColors.goldSoft)),
-              const SizedBox(height: 10),
+              Text('ОТКРЫТЫЕ ВОПРОСЫ', style: AppText.eyebrow.copyWith(color: AppColors.goldSoft)),
+              const SizedBox(height: 8),
               _bullets(step.decide, marker: '?', markerColor: AppColors.goldSoft),
             ],
           ),
@@ -60,12 +60,12 @@ class ExplainPanel extends StatelessWidget {
 
   Widget _block({required String label, required Widget child}) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 18),
+      padding: const EdgeInsets.only(bottom: 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label.toUpperCase(), style: AppText.eyebrow),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           child,
         ],
       ),
@@ -77,18 +77,18 @@ class ExplainPanel extends StatelessWidget {
       children: [
         for (final item in items)
           Padding(
-            padding: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.only(bottom: 7),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(
-                  width: 18,
+                  width: 17,
                   child: Text(marker,
                       style: TextStyle(
-                          color: markerColor, fontSize: 13, fontWeight: FontWeight.w600)),
+                          color: markerColor, fontSize: 12.5, fontWeight: FontWeight.w600)),
                 ),
                 Expanded(
-                  child: Text(item, style: AppText.body.copyWith(fontSize: 13.5, height: 1.5)),
+                  child: Text(item, style: AppText.body.copyWith(fontSize: 13, height: 1.45)),
                 ),
               ],
             ),
